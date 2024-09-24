@@ -1,0 +1,9 @@
+# 忽略 CMake 生成的目录和文件
+/cmake-build-debug/
+/build/
+/.idea/
+/*.log
+*.o
+*.obj
+*.exe
+*.out
