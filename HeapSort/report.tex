@@ -1,0 +1,214 @@
+\documentclass{article}
+\usepackage{ctex}  % 使用 ctex 宏包支持中文
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}  % 用于代码块
+\usepackage{xcolor}    % 用于代码高亮
+
+% 设置代码块样式
+\lstset{
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    rulecolor=\color{gray}
+}
+
+\title{数据结构与算法第七次作业}
+\author{余厚佚 3230101536}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{整体设计思路}
+
+    \begin{enumerate}
+        \item HeapSort.h:
+        \begin{itemize}
+            \item heapify 函数:通过递归方式调整子树，从而确保该节点的子树满足最大堆的性质。
+            \item heapSort 函数:构建最大堆，反复交换堆顶元素与末尾元素，实现排序的目的。
+        \end{itemize}
+        \item test.cpp:
+        \begin{itemize}
+            \item 按照评分标准要求，生成四种不同类型的序列进行测试：随机序列、有序序列、逆序序列和部分重复元素序列，每种序列的长度均不小于1000000。
+            \item 记录两种堆排序在不同序列的排序时间，进行比较。(以及通过check函数验证排序的正确性)
+        \end{itemize}
+    \end{enumerate}
+
+    \section{主要函数的功能和实现细节}
+
+    \subsection{heapify函数}
+
+    \subsubsection{功能}
+
+    heapify 函数的主要作用是维护堆的性质。对于给定的 i ，确保以 i 为根的子树满足最大堆的条件。
+
+    \subsubsection{实现细节}
+
+    template <typename T>
+    void heapify(std::vector<T>\& arr, int n, int i)
+    {
+        int largest = i; // 初始化最大值为根节点
+        int left = 2 * i + 1; // 左子节点索引
+        int right = 2 * i + 2; // 右子节点索引
+
+        if (left < n \&\& arr[left] > arr[largest])    // 如果左子节点存在且大于根节点，更新最大值
+            largest = left;
+
+        if (right < n \&\& arr[right] > arr[largest])  // 如果右子节点存在且大于当前最大值，更新最大值
+            largest = right;
+
+        if (largest != i)                            // 如果最大值不是根节点，交换并递归
+        {
+            std::swap(arr[i], arr[largest]);
+            heapify(arr, n, largest);
+        }
+    }
+
+    \begin{itemize}
+        \item 传入的参数:
+        \begin{itemize}
+            \item arr:：还没变成堆的数组。
+            \item n:当前堆的大小。
+            \item i:当前需要变成堆的索引。
+        \end{itemize}
+        \item 具体实现步骤:
+        \begin{enumerate}
+            \item 假设当前节点 i 是最大值。
+            \item 比较子节点的值，找出三者中的最大值。
+            \item 如果最大值不是当前节点，则交换，并递归，从而确保子树满足堆的性质。
+        \end{enumerate}
+    \end{itemize}
+
+    \subsection{heapSort函数}
+
+    \subsubsection{功能}
+
+    heapSort 函数通过构建最大堆并反复交换堆顶元素与末尾元素，从而实现升序排序。
+
+    \subsubsection{实现细节}
+
+    template <typename T>
+    void heapSort(std::vector<T>\& arr)
+    {
+        int n = arr.size();
+
+        for (int i = n / 2 - 1; i >= 0; --i)    // 从最后一个非叶子节点向前遍历每个节点，利用heapify函数来确保子树满足最大堆的性质
+            heapify(arr, n, i);
+
+        for (int i = n - 1; i >= 0; --i)         // 通过循环，逐步将堆中的最大元素移到数组末尾
+        {
+            std::swap(arr[0], arr[i]);
+            heapify(arr, i, 0);
+        }
+    }
+
+    \begin{itemize}
+        \item 说明:
+        \begin{enumerate}
+            \item 构建最大堆:
+            \begin{itemize}
+                \item 从最后一个非叶子节点开始，调用 heapify 函数，确保满足最大堆的性质。
+            \end{itemize}
+            \item 排序过程:
+            \begin{itemize}
+                \item 将堆顶元素（当前最大值）与数组末尾元素交换。
+                \item 缩小堆的有效范围（即忽略已排序的末尾元素）。
+                \item 调用 heapify 重新调整堆，确保新的堆顶元素是当前堆的最大值。
+            \end{itemize}
+        \end{enumerate}
+    \end{itemize}
+
+    \section{测试流程}
+
+    \subsection{生成要求的四种测试序列}
+
+    \subsection{具体测试步骤}
+
+    \begin{enumerate}
+        \item 打印排序前序列的前50个元素:得到序列的初始状态，便于起见，只输出前50个元素。
+
+        \item 自定义堆排序:
+        \begin{itemize}
+            \item 记录开始时间。
+            \item 调用我写的 heapSort 函数进行排序。
+            \item 记录结束时间，计算排序耗时。
+            \item 验证排序结果的正确性(利用check函数)。
+            \item 打印排序后的前50个元素。
+        \end{itemize}
+
+        \item std::sort\_heap()排序:
+        \begin{itemize}
+            \item 重新生成堆(调用 std::make\_heap())。
+            \item 记录开始时间。
+            \item 调用 std::sort\_heap() 对序列进行排序。
+            \item 记录结束时间，计算排序耗时。
+            \item 验证排序结果的正确性。
+            \item 打印排序后的前50个元素。
+        \end{itemize}
+
+    \end{enumerate}
+
+    \section{测试结果与对比}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+序列类型 & 自定义堆排序时间 (秒) & \lstinline|std::sort_heap| 时间 (秒) \\ \midrule
+随机序列 & 0.0784779 & 0.0951558 \\
+有序序列 & 0.0386108 & 0.0493739 \\
+逆序序列 & 0.0415211 & 0.0538083 \\
+部分重复序列 & 0.0459754 & 0.0498996 \\ \bottomrule
+\end{tabular}
+\caption{性能比较}
+\label{tab:performance_comparison}
+\end{table}
+
+\section{时间复杂度分析及效率差异原因}
+
+\subsection{时间复杂度分析}
+
+堆排序主要由以下两个过程组成：
+
+\begin{enumerate}
+    \item 构建最大堆:
+    \begin{itemize}
+        \item 从最后一个非叶子节点开始，依次调用 heapify 函数，确保整个数组满足最大堆的性质。
+        \item 每次 heapify 的时间复杂度为 $O(\log n)$。
+        \item 总体构建堆的时间复杂度为 $O(n)$。
+    \end{itemize}
+
+    \item 排序过程:
+    \begin{itemize}
+        \item 进行 $n$ 次交换，将堆顶元素（当前最大值）移到数组末尾。
+        \item 每次交换后，调用 heapify 重新调整堆，时间复杂度为 $O(\log n)$。
+        \item 总体排序过程的时间复杂度为 $O(n \log n)$。
+    \end{itemize}
+\end{enumerate}
+
+\subsection{自定义堆排序与std::sort\_heap()效率差异的原因}
+
+在我的代码中，经过测试可以发现，实际上 std::sort\_heap() 运行的更慢QAQ。或许是因为生成的是整型数据==不过一般来说，应该是标准库的更快点，主要原因可能如下：
+
+    \begin{enumerate}
+        \item 更低级的运算符:
+            \begin{itemize}
+                \item 使用了更高效的位运算和内存访问模式，提高了执行效率。
+            \end{itemize}
+
+        \item 迭代实现:
+        \begin{itemize}
+            \item 标准库的heapify 可能采用了迭代方式实现，避免了递归调用带来的栈开销和函数调用开销。
+        \end{itemize}
+    \end{enumerate}
+
+\end{document}
